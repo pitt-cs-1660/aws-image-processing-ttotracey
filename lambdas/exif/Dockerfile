@@ -8,19 +8,18 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # TODO: implement the rest of the image
 #
 ############
-WORKDIR /app
 
-#copy pyproject.toml, 
-COPY pyproject.toml
+WORKDIR ${LAMBDA_TASK_ROOT}
+# #set PYTHONPATH, 
+# ENV PYTHONPATH=/app
 
-#run uv sync, 
+COPY pyproject.toml ${LAMBDA_TASK_ROOT}/
+# install deps
 RUN uv sync
-
-#copy handler.py, 
-COPY handler.py
-
-#set PYTHONPATH, 
-ENV PYTHONPATH=/app
+# copy function code
+COPY handler.py ${LAMBDA_TASK_ROOT}/
+# sync the project
+RUN uv sync --locked --no-install-project --no-editable
 
 #set CMD
-CMD["python", "handler.py"]
+CMD ["handler.exif_handler"]
